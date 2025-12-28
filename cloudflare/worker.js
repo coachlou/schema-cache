@@ -19,6 +19,8 @@ export default {
         // Cache hit - add header to indicate
         const newResponse = new Response(response.body, response);
         newResponse.headers.set('X-Cache', 'HIT');
+        newResponse.headers.set('Access-Control-Allow-Origin', '*');
+        newResponse.headers.set('Access-Control-Expose-Headers', 'X-Cache');
         return newResponse;
       }
 
@@ -33,6 +35,8 @@ export default {
       const responseToCache = new Response(response.body, response);
       responseToCache.headers.set('Cache-Control', 'public, max-age=86400');
       responseToCache.headers.set('X-Cache', 'MISS');
+      responseToCache.headers.set('Access-Control-Allow-Origin', '*');
+      responseToCache.headers.set('Access-Control-Expose-Headers', 'X-Cache');
 
       // Store in cache (don't await - do it in background)
       ctx.waitUntil(cache.put(cacheKey, responseToCache.clone()));

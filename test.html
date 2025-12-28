@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schema Cache Test Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #333; }
+    .section {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .section h2 {
+      margin-top: 0;
+      color: #555;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 10px;
+    }
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 15px;
+      border-radius: 4px;
+      overflow-x: auto;
+      font-size: 13px;
+    }
+    .param { color: #9cdcfe; }
+    .value { color: #ce9178; }
+    .label {
+      font-weight: bold;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    .status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    .status.hit { background: #d4edda; color: #155724; }
+    .status.miss { background: #fff3cd; color: #856404; }
+    .status.pending { background: #e2e3e5; color: #383d41; }
+    .status.error { background: #f8d7da; color: #721c24; }
+    .timing { color: #666; font-size: 14px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Schema Cache Test Page</h1>
+
+  <div class="section">
+    <h2>Request Parameters</h2>
+    <div class="label">Client ID:</div>
+    <pre><span class="value" id="client-id">Loading...</span></pre>
+
+    <div class="label">Page URL:</div>
+    <pre><span class="value" id="page-url">Loading...</span></pre>
+
+    <div class="label">API Endpoint:</div>
+    <pre><span class="value" id="api-endpoint">Loading...</span></pre>
+  </div>
+
+  <div class="section">
+    <h2>Response <span class="status pending" id="cache-status">Pending</span></h2>
+    <div class="label">Cache Status (X-Cache header):</div>
+    <pre><span class="value" id="cache-header">Loading...</span></pre>
+
+    <div class="label">Response Time:</div>
+    <pre><span class="value" id="response-time">Loading...</span></pre>
+
+    <div class="label">Schema JSON-LD:</div>
+    <pre id="schema-json">Loading...</pre>
+  </div>
+
+  <div class="section">
+    <h2>Injected Script Tag</h2>
+    <div class="label">Script element in &lt;head&gt;:</div>
+    <pre id="injected-script">Waiting for injection...</pre>
+  </div>
+
+  <script>
+    // Configuration
+    const CLIENT_ID = '8939ddba-6a96-4bd9-8d7b-b1333c955aeb';
+    const BASE_URL = 'https://schema.coachlou.com/functions/v1';
+
+    // Use hardcoded test URL (this has a schema in the database)
+    const currentUrl = 'https://example.com/services/';
+    document.getElementById('client-id').textContent = CLIENT_ID;
+    document.getElementById('page-url').textContent = currentUrl;
+
+    const apiEndpoint = `${BASE_URL}/get-schema?client_id=${CLIENT_ID}&url=${encodeURIComponent(currentUrl)}`;
+    document.getElementById('api-endpoint').textContent = apiEndpoint;
+
+    // Fetch schema directly to show response details
+    async function testSchemaFetch() {
+      const startTime = performance.now();
+
+      try {
+        const response = await fetch(apiEndpoint);
+        const endTime = performance.now();
+        const duration = (endTime - startTime).toFixed(2);
+
+        // Display timing
+        document.getElementById('response-time').textContent = `${duration}ms`;
+
+        // Debug: show all headers we can access
+        console.log('Response headers:');
+        response.headers.forEach((value, key) => console.log(`  ${key}: ${value}`));
+
+        // Display cache status
+        const cacheHeader = response.headers.get('X-Cache') || 'Not set';
+        document.getElementById('cache-header').textContent = cacheHeader;
+
+        const statusEl = document.getElementById('cache-status');
+        statusEl.textContent = cacheHeader;
+        statusEl.className = 'status ' + (cacheHeader === 'HIT' ? 'hit' : cacheHeader === 'MISS' ? 'miss' : 'pending');
+
+        // Display schema
+        const schema = await response.json();
+        document.getElementById('schema-json').textContent = JSON.stringify(schema, null, 2);
+
+      } catch (error) {
+        document.getElementById('cache-status').textContent = 'Error';
+        document.getElementById('cache-status').className = 'status error';
+        document.getElementById('schema-json').textContent = `Error: ${error.message}`;
+      }
+    }
+
+    // Check for injected script tags
+    function checkInjectedScripts() {
+      const ldJsonScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      if (ldJsonScripts.length > 0) {
+        let output = '';
+        ldJsonScripts.forEach((script, i) => {
+          output += `<!-- Script ${i + 1} -->\n`;
+          try {
+            const parsed = JSON.parse(script.textContent);
+            output += JSON.stringify(parsed, null, 2);
+          } catch {
+            output += script.textContent;
+          }
+          output += '\n';
+        });
+        document.getElementById('injected-script').textContent = output;
+      } else {
+        document.getElementById('injected-script').textContent = 'No JSON-LD scripts injected yet (or no schema for this URL)';
+      }
+    }
+
+    // Run test
+    testSchemaFetch();
+
+    // Check for injected scripts after a delay (loader needs time)
+    setTimeout(checkInjectedScripts, 2000);
+  </script>
+
+  <!-- The actual schema loader -->
+  <script src="https://schema.coachlou.com/functions/v1/schema-loader?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb"></script>
+</body>
+</html>
