@@ -1,7 +1,6 @@
 // supabase/functions/get-schema/index.ts
 // Returns the JSON-LD schema for a specific page URL.
-
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// Optimized for performance with direct REST API call
 
 Deno.serve(async (req) => {
   // Handle CORS preflight
@@ -32,47 +31,57 @@ Deno.serve(async (req) => {
   // Normalize URL (remove trailing slash inconsistencies)
   const normalizedUrl = pageUrl.replace(/\/+$/, '');
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-  );
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
-  // Try exact match first
-  let { data, error } = await supabase
-    .from('page_schemas')
-    .select('schema_json, cache_version')
-    .eq('client_id', clientId)
-    .eq('page_url', normalizedUrl)
-    .single();
+  // Use direct REST API call for faster response (avoids JS client overhead)
+  const apiUrl = `${supabaseUrl}/rest/v1/page_schemas?client_id=eq.${encodeURIComponent(clientId)}&page_url=eq.${encodeURIComponent(normalizedUrl)}&select=schema_json,cache_version&limit=1`;
+
+  const response = await fetch(apiUrl, {
+    headers: {
+      'apikey': serviceKey,
+      'Authorization': `Bearer ${serviceKey}`,
+      'Accept': 'application/json'
+    }
+  });
+
+  let data = await response.json();
 
   // If no exact match, try with trailing slash
-  if (!data) {
-    const result = await supabase
-      .from('page_schemas')
-      .select('schema_json, cache_version')
-      .eq('client_id', clientId)
-      .eq('page_url', normalizedUrl + '/')
-      .single();
-    data = result.data;
+  if (!data || data.length === 0) {
+    const apiUrlWithSlash = `${supabaseUrl}/rest/v1/page_schemas?client_id=eq.${encodeURIComponent(clientId)}&page_url=eq.${encodeURIComponent(normalizedUrl + '/')}&select=schema_json,cache_version&limit=1`;
+    const response2 = await fetch(apiUrlWithSlash, {
+      headers: {
+        'apikey': serviceKey,
+        'Authorization': `Bearer ${serviceKey}`,
+        'Accept': 'application/json'
+      }
+    });
+    data = await response2.json();
   }
 
-  // If still no match, return minimal schema
-  if (!data) {
+  // If still no match, return empty schema
+  if (!data || data.length === 0) {
     return new Response(JSON.stringify({}), {
       headers: {
         'Content-Type': 'application/ld+json',
         'Access-Control-Allow-Origin': '*',
-        'Cache-Control': 'public, max-age=300' // Short cache for missing schemas
+        'Cache-Control': 'public, s-maxage=300, max-age=300',
+        'CDN-Cache-Control': 'public, max-age=300'
       }
     });
   }
 
-  return new Response(JSON.stringify(data.schema_json), {
+  const result = data[0];
+
+  return new Response(JSON.stringify(result.schema_json), {
     headers: {
       'Content-Type': 'application/ld+json',
       'Access-Control-Allow-Origin': '*',
-      'Cache-Control': 'public, max-age=86400', // 24 hour cache
-      'ETag': `"${data.cache_version}"`,        // For cache invalidation
+      'Cache-Control': 'public, s-maxage=86400, max-age=86400',
+      'CDN-Cache-Control': 'public, max-age=86400',
+      'Surrogate-Control': 'max-age=86400',
+      'ETag': `"${result.cache_version}"`,
       'Vary': 'Origin'
     }
   });
