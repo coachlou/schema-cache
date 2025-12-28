@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(supabase link:*)",
+      "Bash(supabase db push:*)",
+      "Bash(supabase functions deploy:*)",
+      "Bash(curl:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial release: Schema Injection Service POC\n\nComplete proof-of-concept implementation including:\n\n- Database schema (clients, page_schemas, drift_signals tables)\n- 5 Supabase Edge Functions:\n  - schema-loader: Returns embeddable JS for client sites\n  - get-schema: Serves JSON-LD schemas with caching\n  - collect-signal: Receives page content hashes for drift detection\n  - update-schema: Creates/updates schemas via authenticated API\n  - get-drift: Returns unprocessed drift signals\n- RLS policies for security\n- Full CORS support for cross-origin requests\n- URL normalization and cache invalidation\n\nDeployed and tested on Supabase project: uxkudwzbqijamqhuowly\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
+    ]
+  }
+}
