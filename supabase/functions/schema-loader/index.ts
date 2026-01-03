@@ -11,6 +11,7 @@ const LOADER_SCRIPT = `
   // Fetch and inject schema
   function loadSchema() {
     var url = baseUrl + '/get-schema?client_id=' + clientId + '&url=' + encodeURIComponent(currentUrl);
+    console.log('[Schema Loader] Fetching schema from:', url);
 
     fetch(url)
       .then(function(r) {
@@ -18,15 +19,19 @@ const LOADER_SCRIPT = `
         return r.json();
       })
       .then(function(schema) {
+        console.log('[Schema Loader] Received schema:', schema);
         if (schema && schema['@context']) {
           var el = document.createElement('script');
           el.type = 'application/ld+json';
           el.textContent = JSON.stringify(schema);
           document.head.appendChild(el);
+          console.log('[Schema Loader] Successfully injected schema into head');
+        } else {
+          console.log('[Schema Loader] Schema missing @context, not injecting');
         }
       })
       .catch(function(e) {
-        console.debug('[Schema Loader] No schema for this page');
+        console.log('[Schema Loader] Failed to load schema:', e.message);
       });
   }
 
