@@ -92,9 +92,15 @@
   </div>
 
   <div class="section">
-    <h2>Injected Script Tag</h2>
-    <div class="label">Script element in &lt;head&gt;:</div>
+    <h2>Injected Script Tag <span class="status pending" id="injection-status">Checking...</span></h2>
+    <p style="font-size: 12px; color: #666; margin-bottom: 10px;">
+      The schema-loader script should automatically inject a &lt;script type="application/ld+json"&gt; tag into the page head.
+    </p>
+    <div class="label">Script elements found in &lt;head&gt;:</div>
     <pre id="injected-script">Waiting for injection...</pre>
+
+    <div class="label" style="margin-top: 15px;">Raw HTML in head:</div>
+    <pre id="head-html" style="font-size: 11px; max-height: 200px; overflow-y: auto;">Loading...</pre>
   </div>
 
   <script>
@@ -164,22 +170,39 @@
     // Check for injected script tags
     function checkInjectedScripts() {
       const ldJsonScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      const statusEl = document.getElementById('injection-status');
+
       if (ldJsonScripts.length > 0) {
-        let output = '';
+        statusEl.textContent = `Found ${ldJsonScripts.length}`;
+        statusEl.className = 'status hit';
+
+        let output = `✅ Found ${ldJsonScripts.length} JSON-LD script tag(s):\n\n`;
         ldJsonScripts.forEach((script, i) => {
-          output += `<!-- Script ${i + 1} -->\n`;
+          output += `=== Script ${i + 1} ===\n`;
           try {
             const parsed = JSON.parse(script.textContent);
             output += JSON.stringify(parsed, null, 2);
           } catch {
             output += script.textContent;
           }
-          output += '\n';
+          output += '\n\n';
         });
         document.getElementById('injected-script').textContent = output;
       } else {
-        document.getElementById('injected-script').textContent = 'No JSON-LD scripts injected yet (or no schema for this URL)';
+        statusEl.textContent = 'Not Found';
+        statusEl.className = 'status miss';
+        document.getElementById('injected-script').textContent = '❌ No JSON-LD scripts found.\n\nPossible reasons:\n- Schema loader hasn\'t run yet (wait 2-3 seconds)\n- No schema exists for this URL\n- JavaScript error in loader (check console)';
       }
+
+      // Show raw head HTML to help debug
+      const headScripts = Array.from(document.head.querySelectorAll('script'))
+        .map(s => {
+          const src = s.src ? ` src="${s.src}"` : '';
+          const type = s.type ? ` type="${s.type}"` : '';
+          return `<script${src}${type}>`;
+        })
+        .join('\n');
+      document.getElementById('head-html').textContent = headScripts || 'No scripts found in head';
     }
 
     // Run test
