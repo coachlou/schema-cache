@@ -5,7 +5,8 @@ const LOADER_SCRIPT = `
 (function() {
   var clientId = '{{CLIENT_ID}}';
   var baseUrl = '{{BASE_URL}}';
-  var currentUrl = window.location.href.split('?')[0].split('#')[0]; // Clean URL
+  var overrideUrl = '{{OVERRIDE_URL}}';
+  var currentUrl = overrideUrl || window.location.href.split('?')[0].split('#')[0]; // Clean URL
 
   // Fetch and inject schema
   function loadSchema() {
@@ -76,6 +77,8 @@ Deno.serve(async (req) => {
   const url = new URL(req.url);
   // Keep client_id in public API for backwards compatibility
   const clientId = url.searchParams.get('client_id');
+  // Optional: page_url parameter for testing/override
+  const pageUrl = url.searchParams.get('page_url') || '';
   // Internally, this maps to organization_id in the database
   const organizationId = clientId;
 
@@ -94,7 +97,8 @@ Deno.serve(async (req) => {
 
   const script = LOADER_SCRIPT
     .replace('{{CLIENT_ID}}', clientId)
-    .replace('{{BASE_URL}}', baseUrl);
+    .replace('{{BASE_URL}}', baseUrl)
+    .replace('{{OVERRIDE_URL}}', pageUrl);
 
   return new Response(script, {
     headers: {
