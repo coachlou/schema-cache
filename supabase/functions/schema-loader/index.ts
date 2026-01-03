@@ -92,8 +92,12 @@ Deno.serve(async (req) => {
   // Validate organization exists (optional but recommended)
   // For POC, we skip this check
 
-  // Always use https for the base URL (edge functions may report http internally)
-  const baseUrl = `https://${url.host}/functions/v1`;
+  // Determine the base URL based on the request host
+  // If accessed via Cloudflare Worker, X-Forwarded-Host will contain the CF Worker domain
+  // Otherwise, use the Supabase host
+  const forwardedHost = req.headers.get('X-Forwarded-Host');
+  const host = forwardedHost || url.host;
+  const baseUrl = `https://${host}/functions/v1`;
 
   const script = LOADER_SCRIPT
     .replace('{{CLIENT_ID}}', clientId)

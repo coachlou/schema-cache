@@ -77,9 +77,12 @@ export default {
 
     // Non-cached requests - just proxy
     const supabaseUrl = new URL(url.pathname + url.search, 'https://uxkudwzbqijamqhuowly.supabase.co');
+    const headers = new Headers(request.headers);
+    // Add X-Forwarded-Host so Edge Functions know the original host
+    headers.set('X-Forwarded-Host', url.host);
     return fetch(supabaseUrl.toString(), {
       method: request.method,
-      headers: request.headers,
+      headers: headers,
       body: request.method !== 'GET' && request.method !== 'HEAD' ? request.body : undefined
     });
   }
