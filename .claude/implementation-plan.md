@@ -204,6 +204,32 @@ Client Website
 - [ ] Multi-schema per page support
 - [ ] Schema validation before storage
 
+### R7.5: Security Hardening
+- [ ] Domain validation on collect-signal (check Origin header matches client's registered domain)
+- [ ] Rate limiting on collect-signal per client_id + IP
+- [ ] Consider signed short-lived tokens instead of raw client_id
+
+### R7.6: Hybrid KV Caching (Performance)
+**Goal:** Reduce latency from ~45ms (CF Cache API) to ~10-20ms (KV)
+
+Architecture:
+```
+Reads:  Browser → CF Worker → Cloudflare KV (~10-20ms)
+Writes: Admin API → Supabase → push to KV
+```
+
+Tasks:
+- [ ] Create Cloudflare KV namespace for schemas
+- [ ] Update Worker to read from KV first (key: `client_id:normalized_url`)
+- [ ] Add KV sync on schema update (Supabase webhook or update-schema function)
+- [ ] Fallback to Supabase if KV miss
+- [ ] Cache invalidation: delete KV key when schema updated
+
+Benefits:
+- ~10-20ms global read latency (vs 45ms current)
+- Supabase remains source of truth for writes, drift, analytics
+- KV is just a fast read-through cache
+
 ### R8: Integrations
 - [ ] Webhook for CMS integrations
 - [ ] Zapier/Make integration

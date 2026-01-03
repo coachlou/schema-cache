@@ -32,9 +32,11 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Map client_id from public API to organization_id for internal use
   const { client_id, url, signals } = body;
+  const organization_id = client_id;
 
-  if (!client_id || !url || !signals?.content_hash) {
+  if (!organization_id || !url || !signals?.content_hash) {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), {
       status: 400,
       headers: {
@@ -55,7 +57,7 @@ Deno.serve(async (req) => {
   const { data: existingSchema } = await supabase
     .from('page_schemas')
     .select('content_hash')
-    .eq('client_id', client_id)
+    .eq('organization_id', organization_id)
     .eq('page_url', normalizedUrl)
     .single();
 
@@ -64,11 +66,12 @@ Deno.serve(async (req) => {
 
   // Store the signal
   await supabase.from('drift_signals').insert({
-    client_id,
+    organization_id,
     page_url: normalizedUrl,
     content_hash: signals.content_hash,
     previous_hash: previousHash,
     drift_detected: driftDetected,
+    drift_type: driftDetected ? 'content_change' : null,
     signals: signals
   });
 

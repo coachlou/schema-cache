@@ -7,7 +7,32 @@
       "Bash(curl:*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nInitial release: Schema Injection Service POC\n\nComplete proof-of-concept implementation including:\n\n- Database schema (clients, page_schemas, drift_signals tables)\n- 5 Supabase Edge Functions:\n  - schema-loader: Returns embeddable JS for client sites\n  - get-schema: Serves JSON-LD schemas with caching\n  - collect-signal: Receives page content hashes for drift detection\n  - update-schema: Creates/updates schemas via authenticated API\n  - get-drift: Returns unprocessed drift signals\n- RLS policies for security\n- Full CORS support for cross-origin requests\n- URL normalization and cache invalidation\n\nDeployed and tested on Supabase project: uxkudwzbqijamqhuowly\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nInitial release: Schema Injection Service POC\n\nComplete proof-of-concept implementation including:\n\n- Database schema (clients, page_schemas, drift_signals tables)\n- 5 Supabase Edge Functions:\n  - schema-loader: Returns embeddable JS for client sites\n  - get-schema: Serves JSON-LD schemas with caching\n  - collect-signal: Receives page content hashes for drift detection\n  - update-schema: Creates/updates schemas via authenticated API\n  - get-drift: Returns unprocessed drift signals\n- RLS policies for security\n- Full CORS support for cross-origin requests\n- URL normalization and cache invalidation\n\nDeployed and tested on Supabase project: uxkudwzbqijamqhuowly\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git tag:*)",
+      "Bash(gh repo create:*)",
+      "Bash(git push:*)",
+      "Bash(for i in {1..10})",
+      "Bash(do curl -s -o /dev/null -w \"%{time_total}\\n\" \"https://uxkudwzbqijamqhuowly.supabase.co/functions/v1/get-schema?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb&url=https://example.com/services/\")",
+      "Bash(done)",
+      "Bash(do curl -s -o /dev/null -w \"%{time_total}\\n\" \"https://uxkudwzbqijamqhuowly.supabase.co/functions/v1/schema-loader?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb\")",
+      "Bash(do curl -s -o /dev/null -w \"%{time_total}\\n\" -X POST \"https://uxkudwzbqijamqhuowly.supabase.co/functions/v1/collect-signal\" -H \"Content-Type: application/json\" -d '{\"\"client_id\"\":\"\"8939ddba-6a96-4bd9-8d7b-b1333c955aeb\"\",\"\"url\"\":\"\"https://example.com/test/\"\",\"\"signals\"\":{\"\"title\"\":\"\"Test\"\",\"\"h1\"\":\"\"Test\"\",\"\"content_hash\"\":\"\"perf'$i'\"\"}}')",
+      "Bash(for i in {1..5})",
+      "Bash(do echo -n \"Request $i: \")",
+      "Bash(do echo -n 'Request $i: ')",
+      "Bash(for i in 1 2 3 4 5 6 7 8 9 10)",
+      "Bash(do curl -s -w \"Request $i: %{time_total}s\\n\" -o /dev/null \"https://uxkudwzbqijamqhuowly.supabase.co/functions/v1/get-schema?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb&url=https://example.com/services/\")",
+      "Bash(for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)",
+      "Bash(do curl -s -w \"%{time_total}\\n\" -o /dev/null \"https://uxkudwzbqijamqhuowly.supabase.co/functions/v1/get-schema?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb&url=https://example.com/services/\")",
+      "Bash(git commit -m \"$(cat <<''EOF''\nOptimize get-schema for performance\n\n- Replace Supabase JS client with direct REST API calls\n- Reduces response time by ~25% (285ms median vs 380ms)\n- Add CDN-Cache-Control and Surrogate-Control headers\n- Add s-maxage for shared cache support\n\nPerformance results (20 requests):\n- Min: 207ms\n- Median: 285ms\n- p90: 430ms\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(dig:*)",
+      "Bash(nslookup:*)",
+      "Bash(host:*)",
+      "Bash(for i in 1 2 3)",
+      "Bash(do echo \"Request $i:\")",
+      "Bash(for i in 1 2 3 4 5)",
+      "Bash(do curl -s -w \"Request $i: %{time_total}s\\n\" -o /dev/null --resolve schema.coachlou.com:443:172.64.80.1 \"https://schema.coachlou.com/functions/v1/get-schema?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb&url=https://example.com/services/\")",
+      "Bash(git commit:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

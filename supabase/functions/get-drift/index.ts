@@ -1,15 +1,16 @@
 // supabase/functions/get-drift/index.ts
-// Returns unprocessed drift signals for a client. Used to check what pages need schema updates.
+// Returns unprocessed drift signals for an organization. Used to check what pages need schema updates.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
-  const clientId = url.searchParams.get('client_id');
+  // Support both old and new parameter names for backwards compatibility
+  const organizationId = url.searchParams.get('organization_id') || url.searchParams.get('client_id');
   const apiKey = req.headers.get('X-API-Key');
 
-  if (!clientId || !apiKey) {
-    return new Response(JSON.stringify({ error: 'Missing client_id or API key' }), {
+  if (!organizationId || !apiKey) {
+    return new Response(JSON.stringify({ error: 'Missing organization_id or API key' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
     });
@@ -21,13 +22,13 @@ Deno.serve(async (req) => {
   );
 
   // Verify API key
-  const { data: client } = await supabase
-    .from('clients')
+  const { data: organization } = await supabase
+    .from('organizations')
     .select('id, api_key')
-    .eq('id', clientId)
+    .eq('id', organizationId)
     .single();
 
-  if (!client || client.api_key !== apiKey) {
+  if (!organization || organization.api_key !== apiKey) {
     return new Response(JSON.stringify({ error: 'Invalid API key' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -37,8 +38,8 @@ Deno.serve(async (req) => {
   // Get unprocessed drift signals, grouped by URL
   const { data: driftSignals } = await supabase
     .from('drift_signals')
-    .select('page_url, content_hash, previous_hash, signals, created_at')
-    .eq('client_id', clientId)
+    .select('page_url, content_hash, previous_hash, drift_type, signals, created_at')
+    .eq('organization_id', organizationId)
     .eq('drift_detected', true)
     .eq('processed', false)
     .order('created_at', { ascending: false });
@@ -51,6 +52,7 @@ Deno.serve(async (req) => {
         page_url: signal.page_url,
         current_hash: signal.content_hash,
         previous_hash: signal.previous_hash,
+        drift_type: signal.drift_type,
         first_detected: signal.created_at,
         signals: signal.signals
       });

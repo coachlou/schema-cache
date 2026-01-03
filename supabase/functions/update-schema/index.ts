@@ -26,9 +26,9 @@ Deno.serve(async (req) => {
     });
   }
 
-  const { client_id, page_url, schema_json, content_hash } = body;
+  const { organization_id, page_url, schema_json, content_hash } = body;
 
-  if (!client_id || !page_url || !schema_json) {
+  if (!organization_id || !page_url || !schema_json) {
     return new Response(JSON.stringify({ error: 'Missing required fields' }), {
       status: 400,
       headers: { 'Content-Type': 'application/json' }
@@ -40,14 +40,14 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   );
 
-  // Verify API key belongs to this client
-  const { data: client } = await supabase
-    .from('clients')
+  // Verify API key belongs to this organization
+  const { data: organization } = await supabase
+    .from('organizations')
     .select('id, api_key')
-    .eq('id', client_id)
+    .eq('id', organization_id)
     .single();
 
-  if (!client || client.api_key !== apiKey) {
+  if (!organization || organization.api_key !== apiKey) {
     return new Response(JSON.stringify({ error: 'Invalid API key' }), {
       status: 403,
       headers: { 'Content-Type': 'application/json' }
@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
   const { data: existing } = await supabase
     .from('page_schemas')
     .select('id, cache_version')
-    .eq('client_id', client_id)
+    .eq('organization_id', organization_id)
     .eq('page_url', normalizedUrl)
     .single();
 
@@ -83,19 +83,23 @@ Deno.serve(async (req) => {
     await supabase
       .from('page_schemas')
       .insert({
-        client_id,
+        organization_id,
         page_url: normalizedUrl,
         schema_json,
         content_hash: content_hash || null,
-        cache_version: 1
+        cache_version: 1,
+        source_mode: 'external'  // Admin API uploads are external
       });
   }
 
   // Mark any drift signals for this URL as processed
   await supabase
     .from('drift_signals')
-    .update({ processed: true })
-    .eq('client_id', client_id)
+    .update({
+      processed: true,
+      processed_at: new Date().toISOString()
+    })
+    .eq('organization_id', organization_id)
     .eq('page_url', normalizedUrl)
     .eq('processed', false);
 

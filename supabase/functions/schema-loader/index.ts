@@ -74,16 +74,19 @@ const LOADER_SCRIPT = `
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
+  // Keep client_id in public API for backwards compatibility
   const clientId = url.searchParams.get('client_id');
+  // Internally, this maps to organization_id in the database
+  const organizationId = clientId;
 
-  if (!clientId) {
+  if (!organizationId) {
     return new Response('// Missing client_id parameter', {
       status: 400,
       headers: { 'Content-Type': 'application/javascript' }
     });
   }
 
-  // Validate client exists (optional but recommended)
+  // Validate organization exists (optional but recommended)
   // For POC, we skip this check
 
   // Always use https for the base URL (edge functions may report http internally)

@@ -15,10 +15,11 @@ Deno.serve(async (req) => {
   }
 
   const url = new URL(req.url);
-  const clientId = url.searchParams.get('client_id');
+  // Keep client_id in public API for backwards compatibility, map to organization_id internally
+  const organizationId = url.searchParams.get('client_id');
   const pageUrl = url.searchParams.get('url');
 
-  if (!clientId || !pageUrl) {
+  if (!organizationId || !pageUrl) {
     return new Response(JSON.stringify({ error: 'Missing client_id or url' }), {
       status: 400,
       headers: {
@@ -35,7 +36,7 @@ Deno.serve(async (req) => {
   const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
   // Use direct REST API call for faster response (avoids JS client overhead)
-  const apiUrl = `${supabaseUrl}/rest/v1/page_schemas?client_id=eq.${encodeURIComponent(clientId)}&page_url=eq.${encodeURIComponent(normalizedUrl)}&select=schema_json,cache_version&limit=1`;
+  const apiUrl = `${supabaseUrl}/rest/v1/page_schemas?organization_id=eq.${encodeURIComponent(organizationId)}&page_url=eq.${encodeURIComponent(normalizedUrl)}&select=schema_json,cache_version&limit=1`;
 
   const response = await fetch(apiUrl, {
     headers: {
@@ -49,7 +50,7 @@ Deno.serve(async (req) => {
 
   // If no exact match, try with trailing slash
   if (!data || data.length === 0) {
-    const apiUrlWithSlash = `${supabaseUrl}/rest/v1/page_schemas?client_id=eq.${encodeURIComponent(clientId)}&page_url=eq.${encodeURIComponent(normalizedUrl + '/')}&select=schema_json,cache_version&limit=1`;
+    const apiUrlWithSlash = `${supabaseUrl}/rest/v1/page_schemas?organization_id=eq.${encodeURIComponent(organizationId)}&page_url=eq.${encodeURIComponent(normalizedUrl + '/')}&select=schema_json,cache_version&limit=1`;
     const response2 = await fetch(apiUrlWithSlash, {
       headers: {
         'apikey': serviceKey,
