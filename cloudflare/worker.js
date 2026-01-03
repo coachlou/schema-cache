@@ -52,9 +52,12 @@ export default {
 
       // Cache miss - fetch from origin
       const supabaseUrl = new URL(url.pathname + url.search, 'https://uxkudwzbqijamqhuowly.supabase.co');
+      const headers = new Headers(request.headers);
+      // Add X-Forwarded-Host so Edge Functions know the original host
+      headers.set('X-Forwarded-Host', url.host);
       response = await fetch(supabaseUrl.toString(), {
         method: request.method,
-        headers: request.headers
+        headers: headers
       });
 
       // Clone response immediately before consuming body
