@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Schema Loader Test</title>
+</head>
+<body>
+  <h1>Simple Schema Loader Test</h1>
+  <p>Check browser console for logs...</p>
+  <p>Check page source after 3 seconds to see if JSON-LD script was injected.</p>
+
+  <!-- Override console.debug to see the loader's debug messages -->
+  <script>
+    console.debug = console.log;
+  </script>
+
+  <!-- The schema loader -->
+  <script src="https://schema.coachlou.com/functions/v1/schema-loader?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb&page_url=https://example.com/services/"></script>
+
+  <script>
+    // After 3 seconds, check if JSON-LD was injected
+    setTimeout(function() {
+      var ldScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      console.log('Found ' + ldScripts.length + ' JSON-LD script tags');
+      if (ldScripts.length > 0) {
+        console.log('SUCCESS: Schema was injected!');
+        console.log('Schema content:', ldScripts[0].textContent);
+      } else {
+        console.error('FAILED: No JSON-LD script found');
+        console.log('All scripts in head:', document.head.innerHTML);
+      }
+    }, 3000);
+  </script>
+</body>
+</html>
