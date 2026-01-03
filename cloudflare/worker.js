@@ -46,7 +46,7 @@ export default {
         const newResponse = new Response(response.body, response);
         newResponse.headers.set('X-Cache', 'HIT');
         newResponse.headers.set('Access-Control-Allow-Origin', '*');
-        newResponse.headers.set('Access-Control-Expose-Headers', 'X-Cache');
+        newResponse.headers.set('Access-Control-Expose-Headers', 'X-Cache, CF-Cache-Status, Age, Cache-Control');
         return newResponse;
       }
 
@@ -65,7 +65,7 @@ export default {
       newResponse.headers.set('Cache-Control', 'public, max-age=86400');
       newResponse.headers.set('X-Cache', 'MISS');
       newResponse.headers.set('Access-Control-Allow-Origin', '*');
-      newResponse.headers.set('Access-Control-Expose-Headers', 'X-Cache');
+      newResponse.headers.set('Access-Control-Expose-Headers', 'X-Cache, CF-Cache-Status, Age, Cache-Control');
 
       // Store clone in cache (don't await - do it in background)
       const cacheResponse = new Response(responseClone.body, responseClone);
