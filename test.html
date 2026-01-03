@@ -139,7 +139,12 @@
                            allHeaders['x-cache'] ||
                            allHeaders['X-Cache'] ||
                            'Not accessible (check console)';
-        document.getElementById('cache-header').textContent = cacheHeader;
+
+        // Also get cache age if available
+        const age = response.headers.get('age') || response.headers.get('Age') || 'N/A';
+        const cfCacheStatus = response.headers.get('cf-cache-status') || 'N/A';
+
+        document.getElementById('cache-header').textContent = `${cacheHeader} (CF: ${cfCacheStatus}, Age: ${age}s)`;
 
         const statusEl = document.getElementById('cache-status');
         statusEl.textContent = cacheHeader;
