@@ -32,7 +32,8 @@
       "Bash(for i in 1 2 3 4 5)",
       "Bash(do curl -s -w \"Request $i: %{time_total}s\\n\" -o /dev/null --resolve schema.coachlou.com:443:172.64.80.1 \"https://schema.coachlou.com/functions/v1/get-schema?client_id=8939ddba-6a96-4bd9-8d7b-b1333c955aeb&url=https://example.com/services/\")",
       "Bash(git commit:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)"
     ]
   }
 }
