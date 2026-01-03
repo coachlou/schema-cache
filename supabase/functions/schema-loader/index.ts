@@ -93,11 +93,18 @@ Deno.serve(async (req) => {
   // For POC, we skip this check
 
   // Determine the base URL based on the request host
-  // If accessed via Cloudflare Worker, X-Forwarded-Host will contain the CF Worker domain
-  // Otherwise, use the Supabase host
-  const forwardedHost = req.headers.get('X-Forwarded-Host');
-  const host = forwardedHost || url.host;
+  // If accessed via Cloudflare Worker, X-Original-Host will contain the CF Worker domain
+  // (Supabase strips X-Forwarded-Host for security, so we use a custom header)
+  const originalHost = req.headers.get('X-Original-Host');
+  const host = originalHost || url.host;
   const baseUrl = `https://${host}/functions/v1`;
+
+  // DEBUG: Log headers for troubleshooting (remove in production)
+  console.log('Headers:', {
+    'X-Original-Host': originalHost,
+    'Host': url.host,
+    'baseUrl': baseUrl
+  });
 
   const script = LOADER_SCRIPT
     .replace('{{CLIENT_ID}}', clientId)

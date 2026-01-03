@@ -53,8 +53,9 @@ export default {
       // Cache miss - fetch from origin
       const supabaseUrl = new URL(url.pathname + url.search, 'https://uxkudwzbqijamqhuowly.supabase.co');
       const headers = new Headers(request.headers);
-      // Add X-Forwarded-Host so Edge Functions know the original host
-      headers.set('X-Forwarded-Host', url.host);
+      // Add custom header so Edge Functions know the original host
+      // Supabase strips X-Forwarded-Host, so use a custom header
+      headers.set('X-Original-Host', url.host);
       response = await fetch(supabaseUrl.toString(), {
         method: request.method,
         headers: headers
@@ -81,8 +82,9 @@ export default {
     // Non-cached requests - just proxy
     const supabaseUrl = new URL(url.pathname + url.search, 'https://uxkudwzbqijamqhuowly.supabase.co');
     const headers = new Headers(request.headers);
-    // Add X-Forwarded-Host so Edge Functions know the original host
-    headers.set('X-Forwarded-Host', url.host);
+    // Add custom header so Edge Functions know the original host
+    // Supabase strips X-Forwarded-Host, so use a custom header
+    headers.set('X-Original-Host', url.host);
     return fetch(supabaseUrl.toString(), {
       method: request.method,
       headers: headers,
