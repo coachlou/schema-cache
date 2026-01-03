@@ -72,6 +72,15 @@
 
   <div class="section">
     <h2>Response <span class="status pending" id="cache-status">Pending</span></h2>
+
+    <button onclick="testSchemaFetch()" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">
+      🔄 Refetch Schema (without page reload)
+    </button>
+    <p style="font-size: 12px; color: #666; margin-top: 8px;">
+      💡 Tip: First request may show MISS. Click the button above to refetch - subsequent requests should show HIT from cache.
+      Page refreshes (F5/Cmd+R) may bypass cache due to browser headers.
+    </p>
+
     <div class="label">Cache Status (X-Cache header):</div>
     <pre><span class="value" id="cache-header">Loading...</span></pre>
 

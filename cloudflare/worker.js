@@ -1,10 +1,30 @@
 // Cloudflare Worker: schema-proxy
 // Proxies requests to Supabase with edge caching for get-schema endpoint
 // Deploy at: schema.coachlou.com
+//
+// Deployment:
+//   1. Log into Cloudflare Dashboard
+//   2. Navigate to Workers & Pages
+//   3. Edit the schema-proxy worker
+//   4. Copy and paste this code
+//   OR use Wrangler CLI:
+//   wrangler deploy
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    // Handle CORS preflight
+    if (request.method === 'OPTIONS') {
+      return new Response(null, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, X-API-Key',
+          'Access-Control-Max-Age': '86400'
+        }
+      });
+    }
 
     // Only cache GET requests to get-schema
     const shouldCache = request.method === 'GET' && url.pathname.includes('/get-schema');
@@ -12,7 +32,13 @@ export default {
     if (shouldCache) {
       // Check cache first
       const cache = caches.default;
-      const cacheKey = new Request(url.toString(), request);
+      // Create cache key from URL only (ignore headers for better cache hits)
+      const cacheKey = new Request(url.toString(), {
+        method: 'GET',
+        headers: {
+          'Host': url.host
+        }
+      });
       let response = await cache.match(cacheKey);
 
       if (response) {
@@ -31,17 +57,22 @@ export default {
         headers: request.headers
       });
 
-      // Clone and modify response for caching
-      const responseToCache = new Response(response.body, response);
-      responseToCache.headers.set('Cache-Control', 'public, max-age=86400');
-      responseToCache.headers.set('X-Cache', 'MISS');
-      responseToCache.headers.set('Access-Control-Allow-Origin', '*');
-      responseToCache.headers.set('Access-Control-Expose-Headers', 'X-Cache');
+      // Clone response immediately before consuming body
+      const responseClone = response.clone();
 
-      // Store in cache (don't await - do it in background)
-      ctx.waitUntil(cache.put(cacheKey, responseToCache.clone()));
+      // Modify headers for client response
+      const newResponse = new Response(response.body, response);
+      newResponse.headers.set('Cache-Control', 'public, max-age=86400');
+      newResponse.headers.set('X-Cache', 'MISS');
+      newResponse.headers.set('Access-Control-Allow-Origin', '*');
+      newResponse.headers.set('Access-Control-Expose-Headers', 'X-Cache');
 
-      return responseToCache;
+      // Store clone in cache (don't await - do it in background)
+      const cacheResponse = new Response(responseClone.body, responseClone);
+      cacheResponse.headers.set('Cache-Control', 'public, max-age=86400');
+      ctx.waitUntil(cache.put(cacheKey, cacheResponse));
+
+      return newResponse;
     }
 
     // Non-cached requests - just proxy
