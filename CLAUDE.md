@@ -36,12 +36,14 @@ supabase/
 └── config.toml
 ```
 
-## Database Schema
+## Database Schema (GEARS v3.6)
 
-Three main tables:
-- **clients** - Client configs (id, name, domain, api_key, settings)
-- **page_schemas** - JSON-LD schemas per URL (client_id, page_url, schema_json, content_hash, cache_version)
-- **drift_signals** - Content change tracking (client_id, page_url, content_hash, drift_detected, processed)
+Core tables:
+- **organizations** - Organization configs (id, name, domain, base_url, api_key, schema_version, phase, settings)
+- **page_schemas** - JSON-LD schemas per URL (organization_id, page_url, schema_json, content_hash, cache_version, source_mode, page_type, entity_matches, confidence_score, generated_content_id)
+- **drift_signals** - Content change tracking (organization_id, page_url, content_hash, drift_detected, drift_type, processed, processed_at)
+
+See [GEARS-DB-SCHEMA.md](GEARS-DB-SCHEMA.md) for complete schema documentation.
 
 ## Development
 
@@ -74,20 +76,24 @@ supabase functions deploy get-drift
 ### Test
 
 ```bash
-# Create a client
-curl -X POST 'https://[project].supabase.co/rest/v1/clients' \
+# Create an organization (use seed scripts for easier setup)
+./scripts/seed-data.sh [project-ref] [service-role-key]
+
+# Or manually create an organization
+curl -X POST 'https://[project].supabase.co/rest/v1/organizations' \
   -H "apikey: [anon-key]" \
   -H "Authorization: Bearer [service-role-key]" \
   -H "Content-Type: application/json" \
-  -d '{"name": "Test Client", "domain": "example.com"}'
+  -H "Prefer: return=representation" \
+  -d '{"name": "Test Organization", "domain": "example.com", "base_url": "https://example.com"}'
 
-# Add a schema
+# Add a schema (Admin API - requires API key)
 curl -X POST 'https://[project].supabase.co/functions/v1/update-schema' \
-  -H "X-API-Key: [client-api-key]" \
+  -H "X-API-Key: [organization-api-key]" \
   -H "Content-Type: application/json" \
-  -d '{"client_id": "[uuid]", "page_url": "https://example.com/", "schema_json": {...}}'
+  -d '{"organization_id": "[uuid]", "page_url": "https://example.com/", "schema_json": {...}}'
 
-# Fetch schema
+# Fetch schema (Public API - uses client_id parameter for backwards compatibility)
 curl 'https://[project].supabase.co/functions/v1/get-schema?client_id=[uuid]&url=https://example.com/'
 ```
 
@@ -122,3 +128,32 @@ Clients add one line to their `<head>`:
 - RLS enabled on all tables
 - Service role bypasses RLS for edge functions
 - Public read access for schemas (needed for loader)
+
+## GEARS v3.6 Migration Notes
+
+### API Compatibility
+
+**Public APIs (backwards compatible):**
+- `schema-loader`, `get-schema`, `collect-signal` continue to accept `client_id` parameter
+- Internally mapped to `organization_id` in database queries
+- No breaking changes for existing embedded scripts
+
+**Admin APIs (breaking changes):**
+- `update-schema` now requires `organization_id` instead of `client_id`
+- `get-drift` supports both `organization_id` and `client_id` for backwards compatibility
+- Organizations now require `base_url` field (e.g., "https://example.com")
+
+### New Fields
+
+**page_schemas:**
+- `source_mode`: 'generation' | 'projection' | 'external'
+- `page_type`: Optional schema type classification
+- `entity_matches`: Mode B entity matching results
+- `confidence_score`: Projection confidence (0.00-1.00)
+- `generated_content_id`: FK to generated_content table
+
+**drift_signals:**
+- `drift_type`: 'content_change' | 'structure_change' | 'entity_drift'
+- `processed_at`: Timestamp when drift was processed
+
+For complete migration details, see [MIGRATION-PLAN.md](MIGRATION-PLAN.md).
