@@ -124,10 +124,21 @@
 
         // Debug: show all headers we can access
         console.log('Response headers:');
-        response.headers.forEach((value, key) => console.log(`  ${key}: ${value}`));
+        const allHeaders = {};
+        response.headers.forEach((value, key) => {
+          console.log(`  ${key}: ${value}`);
+          allHeaders[key] = value;
+        });
+        console.log('All headers as object:', allHeaders);
+        console.log('X-Cache header:', response.headers.get('X-Cache'));
+        console.log('x-cache header (lowercase):', response.headers.get('x-cache'));
 
-        // Display cache status
-        const cacheHeader = response.headers.get('X-Cache') || 'Not set';
+        // Display cache status - try both cases
+        const cacheHeader = response.headers.get('X-Cache') ||
+                           response.headers.get('x-cache') ||
+                           allHeaders['x-cache'] ||
+                           allHeaders['X-Cache'] ||
+                           'Not accessible (check console)';
         document.getElementById('cache-header').textContent = cacheHeader;
 
         const statusEl = document.getElementById('cache-status');
