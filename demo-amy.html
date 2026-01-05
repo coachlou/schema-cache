@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schema Injection Demo - Amy Yamada Coaching</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .hero h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 1.3em;
+      opacity: 0.95;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .page-selector {
+      margin-bottom: 30px;
+    }
+
+    .page-selector label {
+      display: block;
+      margin-bottom: 10px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .page-selector select {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.3s;
+    }
+
+    .page-selector select:hover {
+      border-color: #667eea;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .comparison {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-card {
+      border: 2px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 25px;
+      background: #f9f9f9;
+    }
+
+    .comparison-card.with-schema {
+      border-color: #4caf50;
+      background: #f1f8f4;
+    }
+
+    .comparison-card.without-schema {
+      border-color: #ff9800;
+      background: #fff8f1;
+    }
+
+    .comparison-card h3 {
+      margin-bottom: 15px;
+      font-size: 1.3em;
+    }
+
+    .serp-preview {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      font-size: 14px;
+    }
+
+    .serp-title {
+      color: #1a0dab;
+      font-size: 18px;
+      margin-bottom: 5px;
+      cursor: pointer;
+    }
+
+    .serp-url {
+      color: #006621;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .serp-description {
+      color: #545454;
+      line-height: 1.4;
+    }
+
+    .rich-snippet {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-left: 3px solid #4caf50;
+      font-size: 13px;
+    }
+
+    .rich-snippet strong {
+      color: #4caf50;
+    }
+
+    .schema-display {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 25px;
+      margin-bottom: 30px;
+      text-align: left;
+    }
+
+    .schema-type {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      margin-bottom: 15px;
+      font-weight: 600;
+    }
+
+    .schema-details {
+      display: grid;
+      gap: 15px;
+    }
+
+    .schema-item {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .schema-item:last-child {
+      border-bottom: none;
+    }
+
+    .schema-label {
+      font-weight: 600;
+      color: #666;
+    }
+
+    .schema-value {
+      color: #333;
+    }
+
+    .benefits {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .benefit-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 25px;
+      border-radius: 15px;
+      text-align: center;
+    }
+
+    .benefit-card h3 {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    .benefit-card p {
+      font-size: 0.95em;
+      opacity: 0.95;
+    }
+
+    .implementation {
+      background: #f0f4ff;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 40px;
+    }
+
+    .implementation h3 {
+      margin-bottom: 20px;
+      color: #667eea;
+    }
+
+    .code-block {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .code-block code {
+      color: #ce9178;
+    }
+
+    .copy-button {
+      background: #4caf50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .copy-button:hover {
+      background: #45a049;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-style: italic;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 10px;
+    }
+
+    .status-badge.success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-badge.info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .cta {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 15px;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .cta h2 {
+      margin-bottom: 15px;
+      font-size: 2em;
+    }
+
+    .cta p {
+      font-size: 1.2em;
+      margin-bottom: 25px;
+      opacity: 0.95;
+    }
+
+    .cta-button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 15px 40px;
+      border-radius: 30px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    .error {
+      background: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>Schema Injection Demo</h1>
+      <p>See how structured data makes your pages stand out in Google search results</p>
+    </div>
+
+    <div class="content">
+      <!-- Benefits Section -->
+      <div class="section">
+        <h2 class="section-title">Why Schema Matters for Your Business</h2>
+        <div class="benefits">
+          <div class="benefit-card">
+            <h3>📈 Higher Click-Through Rates</h3>
+            <p>Rich snippets get 30-40% more clicks than plain search results</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🎯 Better Visibility</h3>
+            <p>Stand out in search results with ratings, images, and structured info</p>
+          </div>
+          <div class="benefit-card">
+            <h3>🤖 Voice Search Ready</h3>
+            <p>Optimized for Google Assistant, Siri, and Alexa</p>
+          </div>
+          <div class="benefit-card">
+            <h3>✅ Improved Trust</h3>
+            <p>Verified information builds credibility with potential clients</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Page Selector -->
+      <div class="section">
+        <h2 class="section-title">Try It Out: Select a Page</h2>
+        <div class="page-selector">
+          <label for="page-select">Choose one of your pages to see its schema:</label>
+          <select id="page-select">
+            <option value="https://amyyamada.com">Homepage</option>
+            <option value="https://amyyamada.com/about-amy">About Amy</option>
+            <option value="https://amyyamada.com/speaking">Speaking</option>
+            <option value="https://amyyamada.com/the-ai-power-leap-vip-day">AI Power Leap VIP Day</option>
+            <option value="https://amyyamada.com/join-powerhouseai">Join PowerhouseAI</option>
+            <option value="https://amyyamada.com/join-powerhouse-mastermind">Powerhouse Mastermind</option>
+            <option value="https://amyyamada.com/chatgpt-for-coaches">ChatGPT for Coaches</option>
+            <option value="https://amyyamada.com/book-vip-day">Book VIP Day</option>
+            <option value="https://amyyamada.com/ai">AI Resources</option>
+            <option value="https://amyyamada.com/audit">Audit</option>
+            <option value="https://amyyamada.com/connect">Connect</option>
+            <option value="https://amyyamada.com/contactamy">Contact Amy</option>
+            <option value="https://amyyamada.com/content">Content</option>
+            <option value="https://amyyamada.com/thank-you">Thank You</option>
+            <option value="https://amyyamada.com/welcome-2026">Welcome 2026</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Schema Display -->
+      <div class="section">
+        <h2 class="section-title">What Google & AI Engines See</h2>
+
+        <div class="comparison" style="margin-bottom: 30px;">
+          <div class="comparison-card without-schema">
+            <h3>❌ What's Currently On Your Site</h3>
+            <div class="serp-preview">
+              <div style="font-weight: 600; margin-bottom: 10px; color: #999;">Current schema (if any):</div>
+              <div id="existing-schema-container" class="loading">
+                <p style="color: #999; font-style: italic;">Loading current page schema...</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="comparison-card with-schema">
+            <h3>✅ With Schema Injection <span class="status-badge success" id="cache-status">Loading...</span></h3>
+            <div class="serp-preview">
+              <div style="font-weight: 600; margin-bottom: 10px; color: #4caf50;">Google & AI see structured data:</div>
+              <div id="schema-container" class="loading">
+                <p>Select a page to see its structured data...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Before/After Comparison -->
+      <div class="section">
+        <h2 class="section-title">How AI Engines Understand Your Content</h2>
+        <div class="comparison">
+          <div class="comparison-card without-schema">
+            <h3>❌ Without Structured Data</h3>
+            <div class="serp-preview">
+              <div style="font-weight: 600; margin-bottom: 10px; color: #666;">What AI sees:</div>
+              <div class="serp-description" style="font-style: italic; color: #999;">
+                Raw HTML text without context...<br><br>
+                • No clear entity relationships<br>
+                • Ambiguous content type<br>
+                • Limited understanding of expertise<br>
+                • Reduced citation confidence<br>
+                • No structured knowledge graph data
+              </div>
+            </div>
+          </div>
+          <div class="comparison-card with-schema">
+            <h3>✅ With Schema Injection</h3>
+            <div class="serp-preview">
+              <div style="font-weight: 600; margin-bottom: 10px; color: #4caf50;">What AI understands:</div>
+              <div class="rich-snippet" style="background: #f1f8f4; border-left: 3px solid #4caf50;">
+                <strong>Entity Type:</strong> Person + Organization + Services<br>
+                <strong>Authority Signals:</strong> AI Business Coach, Keynote Speaker, Course Creator<br>
+                <strong>Expertise Areas:</strong> AI Implementation, Conscious Leadership, Business Growth<br>
+                <strong>Relationships:</strong> Creator of Rossco, Founder of PowerhouseAI, VIP Day Provider<br>
+                <strong>Content Types:</strong> Courses, Services, Speaking Events<br>
+                <strong>Citation Value:</strong> ⭐⭐⭐⭐⭐ High confidence for AI recommendations
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f0f4ff; border-radius: 10px; border-left: 4px solid #667eea;">
+          <h4 style="margin-bottom: 10px; color: #667eea;">💡 Why This Matters for AI Discovery</h4>
+          <p style="color: #555; line-height: 1.6;">
+            When AI engines like ChatGPT, Claude, Perplexity, or Gemini crawl your site, structured schema helps them:
+          </p>
+          <ul style="margin-top: 10px; color: #555; line-height: 1.8; padding-left: 20px;">
+            <li><strong>Cite you as an authority</strong> when users ask about AI coaching, business growth, or conscious leadership</li>
+            <li><strong>Recommend your services</strong> with high confidence when relevant to user queries</li>
+            <li><strong>Build knowledge graphs</strong> connecting you to related topics and experts</li>
+            <li><strong>Understand your offerings</strong> (VIP Days, courses, speaking) and suggest them appropriately</li>
+            <li><strong>Extract accurate information</strong> about your expertise, credentials, and unique approaches</li>
+          </ul>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background: #fff8f1; border-radius: 10px; border-left: 4px solid #ff9800;">
+          <h4 style="margin-bottom: 10px; color: #ff9800;">🎯 Real-World Impact</h4>
+          <p style="color: #555; line-height: 1.6;">
+            <strong>Example query:</strong> "Who should I hire for AI implementation coaching for my business?"<br><br>
+            <strong>Without schema:</strong> AI may overlook your site or provide vague recommendations<br>
+            <strong>With schema:</strong> AI can confidently cite "Amy Yamada, AI Business Coach and founder of PowerhouseAI, who specializes in done-with-you AI implementation through VIP days and courses"
+          </p>
+        </div>
+      </div>
+
+      <!-- Implementation Guide -->
+      <div class="section">
+        <div class="implementation">
+          <h3>Easy Implementation - Just One Line of Code</h3>
+          <p style="margin-bottom: 15px; color: #555;">Add this script tag to your website's &lt;head&gt; section, and you're done!</p>
+          <div class="code-block">
+<code>&lt;script src="https://schema.coachlou.com/functions/v1/schema-loader?client_id=21c3dc7d-bf61-4f00-b2b5-945d98807cbf"&gt;&lt;/script&gt;</code>
+          </div>
+          <button class="copy-button" onclick="copyScriptTag()">📋 Copy to Clipboard</button>
+          <p style="margin-top: 20px; color: #555; font-size: 14px;">
+            That's it! The script will automatically detect which page is being viewed and inject the appropriate schema.
+          </p>
+        </div>
+      </div>
+
+      <!-- Call to Action -->
+      <div class="cta">
+        <h2>Ready to Boost Your Search Visibility?</h2>
+        <p>All your schemas are ready to go. Just add the script tag above to your website.</p>
+        <button class="cta-button" onclick="copyScriptTag()">Get Started Now</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const CLIENT_ID = '21c3dc7d-bf61-4f00-b2b5-945d98807cbf';
+    const API_BASE = 'https://schema.coachlou.com/functions/v1';
+
+    // Page selector change handler
+    document.getElementById('page-select').addEventListener('change', async (e) => {
+      const url = e.target.value;
+      await Promise.all([
+        loadSchema(url),
+        loadExistingSchema(url)
+      ]);
+    });
+
+    // Load schema for a given URL
+    async function loadSchema(url) {
+      const container = document.getElementById('schema-container');
+      const cacheStatus = document.getElementById('cache-status');
+
+      container.innerHTML = '<p class="loading">Loading schema data...</p>';
+      cacheStatus.textContent = 'Loading...';
+      cacheStatus.className = 'status-badge info';
+
+      try {
+        const startTime = Date.now();
+        const response = await fetch(`${API_BASE}/get-schema?client_id=${CLIENT_ID}&url=${encodeURIComponent(url)}`);
+        const loadTime = Date.now() - startTime;
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const schema = await response.json();
+
+        // Update cache status
+        const cacheHeader = response.headers.get('X-Cache') || 'MISS';
+        const cfCache = response.headers.get('CF-Cache-Status') || 'N/A';
+        cacheStatus.textContent = `${cacheHeader} (CF: ${cfCache}) · ${loadTime}ms`;
+        cacheStatus.className = cacheHeader === 'HIT' ? 'status-badge success' : 'status-badge info';
+
+        // Display schema
+        displaySchema(schema, url);
+      } catch (error) {
+        container.innerHTML = `<div class="error">❌ Error loading schema: ${error.message}</div>`;
+        cacheStatus.textContent = 'Error';
+        cacheStatus.className = 'status-badge';
+      }
+    }
+
+    // Display schema in a business-friendly format
+    function displaySchema(schema, url) {
+      const container = document.getElementById('schema-container');
+
+      // Handle @graph structure
+      const items = schema['@graph'] || [schema];
+
+      let html = '<div class="schema-display">';
+
+      items.forEach((item, index) => {
+        const type = item['@type'] || 'Unknown';
+        const name = item.name || item.headline || 'Untitled';
+
+        html += `<div style="margin-bottom: 30px;">`;
+        html += `<span class="schema-type">${type}</span>`;
+        html += `<div class="schema-details">`;
+
+        // Display key properties based on type
+        if (type === 'Person') {
+          html += renderSchemaItem('Name', item.name);
+          html += renderSchemaItem('Job Title', item.jobTitle);
+          html += renderSchemaItem('Description', item.description);
+          if (item.worksFor) {
+            html += renderSchemaItem('Works For', item.worksFor['@id'] || item.worksFor.name || 'Organization');
+          }
+        } else if (type === 'Service') {
+          html += renderSchemaItem('Service Name', item.name);
+          html += renderSchemaItem('Description', item.description);
+          html += renderSchemaItem('Service Type', item.serviceType);
+          if (item.offers) {
+            html += renderSchemaItem('Availability', item.offers.availability ? 'In Stock' : 'N/A');
+          }
+          if (item.about && Array.isArray(item.about)) {
+            html += renderSchemaItem('Topics', item.about.map(a => a.name).join(', '));
+          }
+        } else if (type === 'Course') {
+          html += renderSchemaItem('Course Name', item.name);
+          html += renderSchemaItem('Description', item.description);
+          html += renderSchemaItem('Course Code', item.courseCode);
+          html += renderSchemaItem('Level', item.educationalLevel);
+        } else if (type === 'WebPage' || type === 'AboutPage') {
+          html += renderSchemaItem('Page Title', item.name);
+          html += renderSchemaItem('URL', item.url);
+          html += renderSchemaItem('Description', item.description);
+        } else {
+          // Generic display for other types
+          Object.keys(item).forEach(key => {
+            if (key !== '@type' && key !== '@id' && key !== '@context' && typeof item[key] === 'string') {
+              html += renderSchemaItem(capitalizeFirst(key), item[key]);
+            }
+          });
+        }
+
+        html += `</div></div>`;
+      });
+
+      html += '</div>';
+
+      // Add raw JSON toggle
+      html += `
+        <details style="margin-top: 20px;">
+          <summary style="cursor: pointer; color: #667eea; font-weight: 600;">🔍 View Technical Schema (JSON-LD)</summary>
+          <pre style="background: #1e1e1e; color: #d4d4d4; padding: 20px; border-radius: 10px; overflow-x: auto; margin-top: 15px; font-size: 13px; line-height: 1.5; text-align: left; max-width: 100%; word-wrap: break-word; white-space: pre-wrap;">${JSON.stringify(schema, null, 2)}</pre>
+        </details>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function renderSchemaItem(label, value) {
+      if (!value) return '';
+      const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
+      const truncated = displayValue.length > 200 ? displayValue.substring(0, 200) + '...' : displayValue;
+      return `
+        <div class="schema-item">
+          <div class="schema-label">${label}:</div>
+          <div class="schema-value">${truncated}</div>
+        </div>
+      `;
+    }
+
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1).replace(/([A-Z])/g, ' $1');
+    }
+
+    function copyScriptTag() {
+      const scriptTag = `<script src="https://schema.coachlou.com/functions/v1/schema-loader?client_id=21c3dc7d-bf61-4f00-b2b5-945d98807cbf"><\/script>`;
+      navigator.clipboard.writeText(scriptTag).then(() => {
+        alert('✅ Script tag copied to clipboard!');
+      }).catch(err => {
+        alert('❌ Failed to copy: ' + err);
+      });
+    }
+
+    // Load existing schema from live site
+    async function loadExistingSchema(url) {
+      const container = document.getElementById('existing-schema-container');
+      container.innerHTML = '<p style="color: #999; font-style: italic;">Fetching current page schema...</p>';
+
+      try {
+        // Use a CORS proxy to fetch the page
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const response = await fetch(proxyUrl);
+        const data = await response.json();
+        const pageHtml = data.contents;
+
+        // Parse HTML and extract JSON-LD scripts
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(pageHtml, 'text/html');
+        const jsonLdScripts = doc.querySelectorAll('script[type="application/ld+json"]');
+
+        if (jsonLdScripts.length === 0) {
+          container.innerHTML = `
+            <div style="color: #666; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+              <strong>No structured data found</strong><br>
+              <p style="margin-top: 10px; font-size: 14px;">This page doesn't currently have JSON-LD schema markup.</p>
+              <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 5px; font-size: 13px;">
+                ⚠️ Result: Search engines and AI see only raw HTML content
+              </div>
+            </div>
+          `;
+          return;
+        }
+
+        // Parse and display found schemas
+        let outputHtml = '<div style="text-align: left;">';
+        jsonLdScripts.forEach((script, index) => {
+          try {
+            const schema = JSON.parse(script.textContent);
+            const schemaType = schema['@type'] || (schema['@graph'] ? 'Multiple' : 'Unknown');
+
+            outputHtml += `
+              <div style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 5px; border-left: 3px solid #999;">
+                <strong style="color: #666;">Schema ${index + 1}: ${schemaType}</strong>
+                <div style="font-size: 13px; color: #888; margin-top: 5px;">
+                  ${schema.name || schema.headline || 'Generic markup'}
+                </div>
+              </div>
+            `;
+          } catch (e) {
+            console.error('Error parsing schema:', e);
+          }
+        });
+
+        outputHtml += `
+          <div style="margin-top: 10px; padding: 10px; background: #fff8f1; border-radius: 5px; font-size: 13px;">
+            ℹ️ Found ${jsonLdScripts.length} schema(s), but likely generic/basic markup
+          </div>
+          <details style="margin-top: 10px;">
+            <summary style="cursor: pointer; color: #666; font-size: 13px;">View raw schemas</summary>
+            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 8px; overflow-x: auto; margin-top: 10px; font-size: 12px; max-height: 300px; overflow-y: auto; max-width: 100%; word-wrap: break-word; white-space: pre-wrap;">${Array.from(jsonLdScripts).map(s => s.textContent).join('\n\n---\n\n')}</pre>
+          </details>
+        </div>`;
+
+        container.innerHTML = outputHtml;
+      } catch (error) {
+        container.innerHTML = `
+          <div style="color: #999; padding: 15px; background: #f9f9f9; border-radius: 5px;">
+            <strong>Unable to fetch page</strong><br>
+            <p style="margin-top: 10px; font-size: 13px;">CORS restrictions prevent fetching the live site. This comparison shows what enhanced schema provides versus typical basic schema.</p>
+            <div style="margin-top: 10px; font-size: 12px; color: #888;">
+              Error: ${error.message}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    // Load default page on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const defaultUrl = document.getElementById('page-select').value;
+      Promise.all([
+        loadSchema(defaultUrl),
+        loadExistingSchema(defaultUrl)
+      ]);
+    });
+  </script>
+</body>
+</html>

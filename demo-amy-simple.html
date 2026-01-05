@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schema Inspector - Amy Yamada</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: #667eea;
+      color: white;
+      padding: 30px 40px;
+    }
+
+    .header h1 {
+      font-size: 1.8em;
+      margin-bottom: 5px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 1em;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .page-selector {
+      margin-bottom: 30px;
+    }
+
+    .page-selector label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #555;
+    }
+
+    .page-selector select {
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-size: 1.4em;
+      margin-bottom: 15px;
+      color: #667eea;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .schema-box {
+      background: #f9f9f9;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 20px;
+      text-align: left;
+    }
+
+    .schema-type {
+      display: inline-block;
+      background: #667eea;
+      color: white;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .schema-details {
+      display: grid;
+      gap: 12px;
+    }
+
+    .schema-item {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #e8e8e8;
+    }
+
+    .schema-item:last-child {
+      border-bottom: none;
+    }
+
+    .schema-label {
+      font-weight: 600;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .schema-value {
+      color: #333;
+      font-size: 14px;
+    }
+
+    .ai-insights {
+      background: #f0f4ff;
+      border-left: 4px solid #667eea;
+      padding: 20px;
+      border-radius: 5px;
+      margin-top: 30px;
+    }
+
+    .ai-insights h3 {
+      margin-bottom: 12px;
+      color: #667eea;
+      font-size: 1.1em;
+    }
+
+    .ai-insights ul {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.7;
+      color: #555;
+    }
+
+    .ai-insights li {
+      margin-bottom: 8px;
+    }
+
+    details {
+      margin-top: 20px;
+      cursor: pointer;
+    }
+
+    summary {
+      cursor: pointer;
+      color: #667eea;
+      font-weight: 600;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 5px;
+      user-select: none;
+    }
+
+    summary:hover {
+      background: #f0f4ff;
+    }
+
+    pre {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 20px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-top: 10px;
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: left;
+      max-width: 100%;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #999;
+      font-style: italic;
+    }
+
+    .footer {
+      background: #f9f9f9;
+      padding: 20px 40px;
+      border-top: 1px solid #e0e0e0;
+      text-align: center;
+      color: #777;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Schema Inspector</h1>
+      <p>View JSON-LD schema data for amyyamada.com</p>
+    </div>
+
+    <div class="content">
+      <!-- Page Selector -->
+      <div class="page-selector">
+        <label for="page-select">Select a page:</label>
+        <select id="page-select">
+          <option value="https://amyyamada.com">Homepage</option>
+          <option value="https://amyyamada.com/about-amy">About Amy</option>
+          <option value="https://amyyamada.com/speaking">Speaking</option>
+          <option value="https://amyyamada.com/the-ai-power-leap-vip-day">AI Power Leap VIP Day</option>
+          <option value="https://amyyamada.com/join-powerhouseai">Join PowerhouseAI</option>
+          <option value="https://amyyamada.com/join-powerhouse-mastermind">Powerhouse Mastermind</option>
+          <option value="https://amyyamada.com/chatgpt-for-coaches">ChatGPT for Coaches</option>
+          <option value="https://amyyamada.com/book-vip-day">Book VIP Day</option>
+          <option value="https://amyyamada.com/ai">AI Resources</option>
+          <option value="https://amyyamada.com/audit">Audit</option>
+          <option value="https://amyyamada.com/connect">Connect</option>
+          <option value="https://amyyamada.com/contactamy">Contact Amy</option>
+          <option value="https://amyyamada.com/content">Content</option>
+          <option value="https://amyyamada.com/thank-you">Thank You</option>
+          <option value="https://amyyamada.com/welcome-2026">Welcome 2026</option>
+        </select>
+      </div>
+
+      <!-- Schema Display -->
+      <div class="section">
+        <h2 class="section-title">
+          Injected Schema Data
+          <span class="status-badge" id="cache-status">Loading...</span>
+        </h2>
+        <div id="schema-container" class="loading">
+          <p>Loading schema...</p>
+        </div>
+      </div>
+
+      <!-- AI Understanding -->
+      <div class="section">
+        <div class="ai-insights">
+          <h3>What AI Engines Extract From This Schema</h3>
+          <ul id="ai-insights-list">
+            <li>Loading insights...</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      Schema Cache System • Organization ID: 21c3dc7d-bf61-4f00-b2b5-945d98807cbf
+    </div>
+  </div>
+
+  <script>
+    const CLIENT_ID = '21c3dc7d-bf61-4f00-b2b5-945d98807cbf';
+    const API_BASE = 'https://schema.coachlou.com/functions/v1';
+
+    // Page selector change handler
+    document.getElementById('page-select').addEventListener('change', async (e) => {
+      const url = e.target.value;
+      await loadSchema(url);
+    });
+
+    // Load schema for a given URL
+    async function loadSchema(url) {
+      const container = document.getElementById('schema-container');
+      const cacheStatus = document.getElementById('cache-status');
+      const insightsList = document.getElementById('ai-insights-list');
+
+      container.innerHTML = '<p class="loading">Loading schema data...</p>';
+      cacheStatus.textContent = 'Loading...';
+      insightsList.innerHTML = '<li>Loading insights...</li>';
+
+      try {
+        const startTime = Date.now();
+        const response = await fetch(`${API_BASE}/get-schema?client_id=${CLIENT_ID}&url=${encodeURIComponent(url)}`);
+        const loadTime = Date.now() - startTime;
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const schema = await response.json();
+
+        // Update cache status
+        const cacheHeader = response.headers.get('X-Cache') || 'MISS';
+        cacheStatus.textContent = `${cacheHeader} (${loadTime}ms)`;
+
+        // Display schema
+        displaySchema(schema, url);
+
+        // Generate AI insights
+        generateInsights(schema);
+
+      } catch (error) {
+        container.innerHTML = `<div style="color: #c62828; padding: 20px; text-align: center;">Error: ${error.message}</div>`;
+        cacheStatus.textContent = 'Error';
+        insightsList.innerHTML = `<li>Unable to generate insights</li>`;
+      }
+    }
+
+    // Display schema in a clean format
+    function displaySchema(schema, url) {
+      const container = document.getElementById('schema-container');
+
+      // Handle @graph structure
+      const items = schema['@graph'] || [schema];
+
+      let html = '<div class="schema-box">';
+
+      items.forEach((item, index) => {
+        const type = item['@type'] || 'Unknown';
+        const name = item.name || item.headline || 'Untitled';
+
+        html += `<div style="margin-bottom: ${index < items.length - 1 ? '30px' : '0'};">`;
+        html += `<span class="schema-type">${type}</span>`;
+        html += `<div class="schema-details">`;
+
+        // Display key properties based on type
+        if (type === 'Person') {
+          html += renderSchemaItem('Name', item.name);
+          html += renderSchemaItem('Job Title', item.jobTitle);
+          html += renderSchemaItem('Description', item.description);
+        } else if (type === 'Service') {
+          html += renderSchemaItem('Service Name', item.name);
+          html += renderSchemaItem('Description', item.description);
+          html += renderSchemaItem('Service Type', item.serviceType);
+        } else if (type === 'Course') {
+          html += renderSchemaItem('Course Name', item.name);
+          html += renderSchemaItem('Description', item.description);
+          html += renderSchemaItem('Course Code', item.courseCode);
+        } else if (type === 'WebPage' || type === 'AboutPage') {
+          html += renderSchemaItem('Page Title', item.name);
+          html += renderSchemaItem('URL', item.url);
+          html += renderSchemaItem('Description', item.description);
+        } else {
+          // Generic display
+          Object.keys(item).forEach(key => {
+            if (key !== '@type' && key !== '@id' && key !== '@context' && typeof item[key] === 'string') {
+              html += renderSchemaItem(capitalizeFirst(key), item[key]);
+            }
+          });
+        }
+
+        html += `</div></div>`;
+      });
+
+      html += '</div>';
+
+      // Add raw JSON toggle (expanded by default)
+      html += `
+        <details open>
+          <summary>🔍 Raw JSON-LD Schema</summary>
+          <pre>${JSON.stringify(schema, null, 2)}</pre>
+        </details>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function renderSchemaItem(label, value) {
+      if (!value) return '';
+      const displayValue = typeof value === 'object' ? JSON.stringify(value) : value;
+      const truncated = displayValue.length > 200 ? displayValue.substring(0, 200) + '...' : displayValue;
+      return `
+        <div class="schema-item">
+          <div class="schema-label">${label}:</div>
+          <div class="schema-value">${truncated}</div>
+        </div>
+      `;
+    }
+
+    function capitalizeFirst(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1).replace(/([A-Z])/g, ' $1');
+    }
+
+    // Generate AI insights from schema
+    function generateInsights(schema) {
+      const insightsList = document.getElementById('ai-insights-list');
+      const insights = [];
+
+      // Handle @graph structure
+      const items = schema['@graph'] || [schema];
+
+      items.forEach(item => {
+        const type = item['@type'];
+
+        if (type === 'Person') {
+          insights.push(`<strong>Identity:</strong> AI recognizes ${item.name} as a person with role: ${item.jobTitle || 'professional'}`);
+          if (item.description) {
+            insights.push(`<strong>Profile:</strong> ${item.description.substring(0, 100)}...`);
+          }
+        } else if (type === 'Service') {
+          insights.push(`<strong>Service Offering:</strong> AI can recommend "${item.name}" when users search for ${item.serviceType || 'related services'}`);
+          if (item.about && Array.isArray(item.about)) {
+            insights.push(`<strong>Topics:</strong> Connected to ${item.about.length} domain concepts for topical authority`);
+          }
+        } else if (type === 'Course') {
+          insights.push(`<strong>Educational Content:</strong> AI recognizes "${item.name}" as a structured course offering`);
+          if (item.educationalLevel) {
+            insights.push(`<strong>Target Audience:</strong> ${item.educationalLevel} level learners`);
+          }
+        } else if (type === 'WebPage' || type === 'AboutPage') {
+          insights.push(`<strong>Page Context:</strong> AI understands this as a ${type} with defined purpose and content`);
+        }
+      });
+
+      // Add entity relationship insight
+      if (items.length > 1) {
+        insights.push(`<strong>Entity Relationships:</strong> ${items.length} interconnected schema entities create a knowledge graph`);
+      }
+
+      // Generic insights
+      insights.push(`<strong>Citation Confidence:</strong> Structured data increases AI's confidence in citing this content as authoritative`);
+      insights.push(`<strong>Search Visibility:</strong> AI engines can extract and present this information in response to relevant queries`);
+
+      insightsList.innerHTML = insights.map(i => `<li>${i}</li>`).join('');
+    }
+
+    // Load default page on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const defaultUrl = document.getElementById('page-select').value;
+      loadSchema(defaultUrl);
+    });
+  </script>
+</body>
+</html>
