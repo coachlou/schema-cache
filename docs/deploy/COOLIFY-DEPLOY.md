@@ -3,7 +3,7 @@
 ## Step 1: Commit Files
 
 ```bash
-git add Dockerfile .dockerignore test.html
+git add ../../Dockerfile .dockerignore ../../test.html
 git commit -m "Add schema cache test page deployment"
 git push origin main
 ```
@@ -36,7 +36,7 @@ Once deployed, visit your domain. You should see the Schema Cache Test Page.
 
 **If deployment fails:**
 - Check Coolify build logs
-- Ensure Dockerfile is in repository root
+- Ensure ../../Dockerfile is in repository root
 - Verify port 80 is exposed
 
 **If cache shows MISS every time:**
@@ -46,7 +46,7 @@ Once deployed, visit your domain. You should see the Schema Cache Test Page.
 
 ## Environment Variables (Optional)
 
-To use a different client_id, you can modify test.html or add query parameters:
+To use a different client_id, you can modify ../../test.html or add query parameters:
 
 ```
 https://schema-test.yourdomain.com?client_id=YOUR_CLIENT_ID

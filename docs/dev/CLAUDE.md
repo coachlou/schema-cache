@@ -77,7 +77,7 @@ supabase functions deploy get-drift
 
 ```bash
 # Create an organization (use seed scripts for easier setup)
-./scripts/seed-data.sh [project-ref] [service-role-key]
+../../scripts/seed-data.sh [project-ref] [service-role-key]
 
 # Or manually create an organization
 curl -X POST 'https://[project].supabase.co/rest/v1/organizations' \

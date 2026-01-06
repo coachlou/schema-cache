@@ -1,6 +1,6 @@
 # Deployment Guide
 
-## Deploying test.html to Coolify/VPS
+## Deploying ../../test.html to Coolify/VPS
 
 This guide shows how to deploy the schema cache test page as a static website.
 
@@ -8,8 +8,8 @@ This guide shows how to deploy the schema cache test page as a static website.
 
 1. **Push to Git Repository**
    ```bash
-   git add Dockerfile nginx.conf .dockerignore test.html
-   git commit -m "Add static site deployment for test.html"
+   git add ../../Dockerfile ../../nginx.conf .dockerignore ../../test.html
+   git commit -m "Add static site deployment for ../../test.html"
    git push origin main
    ```
 
@@ -18,7 +18,7 @@ This guide shows how to deploy the schema cache test page as a static website.
    - Click "New Resource" → "Application"
    - Select your Git repository
    - Branch: `main`
-   - Build Pack: **Dockerfile**
+   - Build Pack: **../../Dockerfile**
    - Port: `80`
 
 3. **Configure Domain**
@@ -70,7 +70,7 @@ This guide shows how to deploy the schema cache test page as a static website.
 1. **Create `public` directory**
    ```bash
    mkdir public
-   cp test.html public/index.html
+   cp ../../test.html public/index.html
    ```
 
 2. **Push to GitHub**
@@ -97,7 +97,7 @@ Once deployed, test the caching:
 
 ### Environment-Specific Configuration
 
-If you need to use different client IDs or domains per environment, you can modify test.html to read from query parameters:
+If you need to use different client IDs or domains per environment, you can modify ../../test.html to read from query parameters:
 
 ```javascript
 const CLIENT_ID = new URLSearchParams(window.location.search).get('client_id') || '8939ddba-6a96-4bd9-8d7b-b1333c955aeb';
