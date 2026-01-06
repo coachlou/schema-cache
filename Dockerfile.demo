@@ -1,7 +1,7 @@
 FROM nginx:alpine
 
 # Copy the demo page
-COPY demo-amy.html /usr/share/nginx/html/index.html
+COPY demo/demo-amy.html /usr/share/nginx/html/index.html
 
 # Expose port 80
 EXPOSE 80

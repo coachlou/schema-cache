@@ -26,8 +26,8 @@
 - API Key: (stored in Supabase organizations table)
 
 **Demo Pages Created:**
-- `demo-amy.html` - Full interactive demo with before/after comparison
-- `demo-amy-simple.html` - Technical schema inspector (minimal UI)
+- `../../demo/demo-amy.html` - Full interactive demo with before/after comparison
+- `../../demo/demo-amy-simple.html` - Technical schema inspector (minimal UI)
 - Both use live schema fetching via CORS proxy (api.allorigins.win)
 
 ### Infrastructure
@@ -60,13 +60,13 @@
 - `GEARS-DB-SCHEMA.md` - Full database schema reference
 
 **Demo and Client Integration:**
-- `demo-amy.html` - Full-featured demo (sales focus)
-- `demo-amy-simple.html` - Technical inspector (minimal UI, JSON expanded)
+- `../../demo/demo-amy.html` - Full-featured demo (sales focus)
+- `../../demo/demo-amy-simple.html` - Technical inspector (minimal UI, JSON expanded)
 - `Dockerfile.demo` - Docker container for demo deployment
 
 **Scripts:**
-- `scripts/migrate-amyyamada.sh` - Bash migration script (not needed, data already in DB)
-- `scripts/migrate-amyyamada.ts` - TypeScript migration script (not needed)
+- `../../scripts/migrate-amyyamada.sh` - Bash migration script (not needed, data already in DB)
+- `../../scripts/migrate-amyyamada.ts` - TypeScript migration script (not needed)
 - `cleanup-duplicates.sh` - Used to clean up 5 duplicate Amy orgs (already executed)
 
 **Project Documentation:**
@@ -77,8 +77,8 @@
 ### Recent File Changes (User Modified)
 
 The following files were modified by user/linter after last commit:
-- `demo-amy-simple.html` - JSON schema expanded by default (line 374: `<details open>`)
-- `demo-amy.html` - UI alignment fixes, live schema fetching added
+- `../../demo/demo-amy-simple.html` - JSON schema expanded by default (line 374: `<details open>`)
+- `../../demo/demo-amy.html` - UI alignment fixes, live schema fetching added
 - `.claude/settings.local.json` - Git command permissions updated
 
 **Action needed:** These changes should be committed in next session if intentional.
@@ -112,7 +112,7 @@ The following files were modified by user/linter after last commit:
 ## Next Steps / Potential Tasks
 
 ### Immediate
-1. Commit user-modified files (demo-amy.html, demo-amy-simple.html) if changes are final
+1. Commit user-modified files (../../demo/demo-amy.html, ../../demo/demo-amy-simple.html) if changes are final
 2. Deploy demo to Coolify/VPS for Amy to review
 3. Share demo URL with Amy Yamada
 
@@ -189,8 +189,8 @@ supabase db push
 ## Files to Review in Next Session
 
 If changes need to be committed:
-- `demo-amy.html` (user modified)
-- `demo-amy-simple.html` (user modified)
+- `../../demo/demo-amy.html` (user modified)
+- `../../demo/demo-amy-simple.html` (user modified)
 - `.claude/settings.local.json` (user modified)
 
 Check git status to see current working tree state.

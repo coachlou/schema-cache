@@ -38,7 +38,7 @@ This document provides a step-by-step migration plan to convert the schema-cache
 
 ### 1.1 Create New Migration File
 
-- [ ] Create file: `supabase/migrations/20250101000001_migrate_to_gears.sql`
+- [ ] Create file: `../../supabase/migrations/20250101000001_migrate_to_gears.sql`
 
 **Contents:**
 
@@ -107,7 +107,7 @@ ALTER INDEX IF EXISTS idx_clients_domain RENAME TO idx_organizations_domain;
 
 ### 2.1 Create Type Definition File
 
-- [ ] Create file: `types/database.ts`
+- [ ] Create file: `../../types/database.ts`
 - [ ] Copy types from `GEARS-TYPESCRIPTS-TYPES.md`
 
 **Priority Interfaces (Phase 1):**
@@ -194,7 +194,7 @@ export interface EntityMatch {
 
 ### 2.2 Type Definition Checklist
 
-- [ ] Create `types/database.ts` with core interfaces
+- [ ] Create `../../types/database.ts` with core interfaces
 - [ ] Add `Organization` interface
 - [ ] Add `PageSchema` interface with new fields
 - [ ] Add `DriftSignal` interface with new fields
@@ -210,7 +210,7 @@ export interface EntityMatch {
 
 ### 3.1 Update `collect-signal/index.ts`
 
-**File:** `supabase/functions/collect-signal/index.ts`
+**File:** `../../supabase/functions/collect-signal/index.ts`
 
 **Changes:**
 
@@ -285,7 +285,7 @@ const { error: insertError } = await supabase
 
 ### 3.2 Update `update-schema/index.ts`
 
-**File:** `supabase/functions/update-schema/index.ts`
+**File:** `../../supabase/functions/update-schema/index.ts`
 
 **Changes:**
 
@@ -362,7 +362,7 @@ const { error: insertError } = await supabase
 
 ### 3.3 Update `get-drift/index.ts`
 
-**File:** `supabase/functions/get-drift/index.ts`
+**File:** `../../supabase/functions/get-drift/index.ts`
 
 **Changes:**
 
@@ -450,7 +450,7 @@ const { data: signals } = await supabase
 
 ### 3.4 Update `get-schema/index.ts`
 
-**File:** `supabase/functions/get-schema/index.ts`
+**File:** `../../supabase/functions/get-schema/index.ts`
 
 **Changes:**
 
@@ -505,7 +505,7 @@ const fallbackUrl = `${supabaseUrl}/rest/v1/page_schemas?organization_id=eq.${en
 
 ### 3.5 Update `schema-loader/index.ts`
 
-**File:** `supabase/functions/schema-loader/index.ts`
+**File:** `../../supabase/functions/schema-loader/index.ts`
 
 **Changes:**
 
@@ -550,7 +550,7 @@ if (!organizationId) {
 
 ### 4.1 Update `seed-data.ts`
 
-**File:** `scripts/seed-data.ts`
+**File:** `../../scripts/seed-data.ts`
 
 **Changes:**
 
@@ -678,7 +678,7 @@ Continue updating all references to `client.id` and `client.api_key` throughout 
 
 ### 4.2 Update `seed-data.sh`
 
-**File:** `scripts/seed-data.sh`
+**File:** `../../scripts/seed-data.sh`
 
 **Changes:**
 
@@ -836,9 +836,9 @@ curl -X POST 'https://[project].supabase.co/functions/v1/update-schema' \
 
 ---
 
-### 5.2 Update `scripts/README.md`
+### 5.2 Update `SCRIPTS-README.md`
 
-**File:** `scripts/README.md`
+**File:** `SCRIPTS-README.md`
 
 **Changes:**
 
@@ -913,7 +913,7 @@ VALUES (
 
 ### 5.3 Update Implementation Plan (if needed)
 
-**File:** `.claude/implementation-plan.md`
+**File:** `../../.claude/implementation-plan.md`
 
 - [ ] Update references to `client_id` in examples
 - [ ] Note API versioning strategy
@@ -924,8 +924,8 @@ VALUES (
 ### 5.4 Documentation Checklist
 
 - [ ] Update `CLAUDE.md` - all schema references and examples
-- [ ] Update `scripts/README.md` - all examples and SQL queries
-- [ ] Update `.claude/implementation-plan.md` - migration notes
+- [ ] Update `SCRIPTS-README.md` - all examples and SQL queries
+- [ ] Update `../../.claude/implementation-plan.md` - migration notes
 - [ ] Review all markdown files for stray references
 - [ ] Update any API documentation
 
@@ -1079,7 +1079,7 @@ Test each function individually:
 
 - [ ] Run TypeScript seed script:
   ```bash
-  SUPABASE_SERVICE_ROLE_KEY=your-key deno run --allow-net --allow-env scripts/seed-data.ts
+  SUPABASE_SERVICE_ROLE_KEY=your-key deno run --allow-net --allow-env ../../scripts/seed-data.ts
   ```
 - [ ] Verify organization created with `base_url`
 - [ ] Verify 4 schemas created
@@ -1096,8 +1096,8 @@ Test each function individually:
 
 ### 6.4 Integration Testing
 
-- [ ] Update `test.html` with new organization ID
-- [ ] Open `test.html` in browser
+- [ ] Update `../../test.html` with new organization ID
+- [ ] Open `../../test.html` in browser
 - [ ] Verify schema-loader executes without errors
 - [ ] Check browser console for successful schema injection
 - [ ] View page source - verify JSON-LD present in `<head>`
@@ -1140,7 +1140,7 @@ wait
 - [ ] All database validation queries pass
 - [ ] All 5 edge functions deployed and tested
 - [ ] Both seed scripts create valid data
-- [ ] Integration test with `test.html` succeeds
+- [ ] Integration test with `../../test.html` succeeds
 - [ ] Backwards compatibility confirmed
 - [ ] Performance benchmarks meet targets
 - [ ] No console errors or warnings
@@ -1380,7 +1380,7 @@ The following endpoints have updated parameter names:
 Public APIs (schema-loader, get-schema, collect-signal) are
 unchanged and maintain backwards compatibility.
 
-Update your scripts/tools accordingly.
+Update your ../../scripts/tools accordingly.
 ```
 
 ---

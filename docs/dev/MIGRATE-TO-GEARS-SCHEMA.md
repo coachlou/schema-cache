@@ -8,7 +8,7 @@ Migrate the existing Schema Injection Service codebase to use the GEARS v3.6 dat
 
 ## Reference Document
 
-The file `gears-database-schema.md` (in this same directory or provided separately) contains the complete target Supabase schema. Use it as the source of truth for all table structures, column names, and relationships.
+The file `GEARS-DB-SCHEMA.md` (in this same directory or provided separately) contains the complete target Supabase schema. Use it as the source of truth for all table structures, column names, and relationships.
 
 ---
 
@@ -91,7 +91,7 @@ base_url: string;  // Required, e.g., "https://example.com"
 - `evidence_claims`
 - `node_types`
 
-See `gears-database-schema.md` for complete column definitions.
+See `GEARS-DB-SCHEMA.md` for complete column definitions.
 
 ---
 
@@ -102,7 +102,7 @@ See `gears-database-schema.md` for complete column definitions.
 Create or update interfaces to match the GEARS schema. Example structure:
 
 ```typescript
-// types/database.ts
+// ../../types/database.ts
 
 export interface Organization {
   id: string;
